@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>HexaSync · Daily Formatter</title>
-<meta name="description" content="Dán daily note của cả team, nhận lại một block markdown đúng chuẩn HexaSync Delivery Daily." />
+<meta name="description" content="Paste the team's raw daily notes and get back one standard HexaSync Delivery Daily markdown block." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,4 92,27 92,73 50,96 8,73 8,27' fill='%234CE0C0'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 213 247'><path fill='%23fcb017' d='M106.4,0L0,61.7v123.4l106.4,61.7,106.4-61.7V61.7L106.4,0ZM106.3,22.6l81.5,47.3-81.5,47.3L24.9,69.9,106.3,22.6ZM192.5,172.4l-86.1,50.1-86.1-49.6v-29.5l86.1,49.6,86.1-50.1v29.5ZM192.5,119.7l-86.1,50.1L20.3,119.7v-29.5l86.2,50.1,86.1-50.1v29.5Z'/></svg>">
 <style>
   :root{
     --ink:#0C111D;
@@ -61,7 +61,8 @@
     padding-bottom:18px; margin-bottom:18px; border-bottom:1px solid var(--line-soft);
   }
   .brand{display:flex; align-items:center; gap:13px; min-width:0}
-  .mark{width:38px; height:38px; flex:none; display:block}
+  .logo{height:29px; width:auto; flex:none; display:block}
+  .brand-rule{width:1px; height:36px; background:var(--line); flex:none; margin:0 3px}
   .brand h1{
     margin:0; font-family:var(--mono); font-size:17px; font-weight:600;
     letter-spacing:.14em; text-transform:uppercase; white-space:nowrap;
@@ -106,9 +107,12 @@
     .top-fields{width:100%}
     .field{flex:1 1 140px}
     .field input{width:100% !important}
+    .panel-head{flex-wrap:wrap}
+    .panel-head .btn-row{width:100%}
+    .panel-head .btn-row .btn{flex:1}
   }
 
-  /* ---------- note của tôi ---------- */
+  /* ---------- my note ---------- */
   .mine-body{padding:12px 14px 14px; display:flex; flex-direction:column; gap:9px}
   .mine-body .lbl{
     font-family:var(--mono); font-size:10.5px; letter-spacing:.16em;
@@ -235,10 +239,15 @@
   .btn:hover{color:var(--text); border-color:var(--edge)}
   .btn:active{transform:translateY(1px)}
   .btn:focus-visible{outline:2px solid var(--edge); outline-offset:2px}
+  .btn.accent{border-color:var(--edge); color:var(--edge)}
+  .btn.accent:hover{background:rgba(124,147,255,.12); color:#fff}
   .btn.primary{background:var(--sync); border-color:var(--sync); color:#06251E; font-weight:600}
   .btn.primary:hover{background:#69EACE; color:#06251E}
   .btn.ok{background:var(--sync); border-color:var(--sync); color:#06251E}
   .btn-row{display:flex; gap:8px; flex-wrap:wrap}
+
+  #panelOutput{transition:border-color .25s, box-shadow .25s}
+  #panelOutput.flash{border-color:var(--sync); box-shadow:0 0 0 2px rgba(76,224,192,.22)}
 
   .warn{
     margin:0; padding:10px 14px; border-top:1px solid var(--line-soft);
@@ -264,13 +273,11 @@
 
   <header class="top">
     <div class="brand">
-      <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
-        <polygon points="50,3 91,26 91,74 50,97 9,74 9,26" fill="none" stroke="#4CE0C0" stroke-width="4"/>
-        <polygon points="50,26 71,38 71,62 50,74 29,62 29,38" fill="#7C93FF" opacity=".85"/>
-      </svg>
+      <svg class="logo" viewBox="0 0 874 246.9" fill="#fcb017" role="img" aria-label="BeHexa"><path d="M365.1,143.6c0,7-1,13.4-3.1,19-2.1,5.6-5,10.5-8.9,14.5-3.9,4-8.5,7.1-14,9.2-5.5,2.1-11.7,3.2-18.6,3.2s-13.1-.5-19.2-1.5c-6.1-1-11.2-2.1-15.2-3.4V60.6l20.3-3.4v45.4c2.3-1.2,5.2-2.3,8.6-3.4,3.4-1,7.2-1.5,11.3-1.5,6.1,0,11.7,1.1,16.5,3.3,4.9,2.2,8.9,5.3,12.2,9.3,3.2,4,5.7,8.9,7.5,14.5,1.7,5.6,2.6,11.9,2.6,18.7ZM344.3,143.3c0-8.6-1.7-15.4-5.1-20.5-3.4-5-8.8-7.5-16.2-7.5s-6.5.5-9.5,1.5c-3,1-5.3,2.1-7.1,3.4v50.5c1.4.3,3.3.6,5.6.9,2.3.3,5.1.4,8.3.4,7.5,0,13.4-2.5,17.6-7.6,4.2-5.1,6.4-12.1,6.4-21Z"/><path d="M372.8,144c0-7.7,1.1-14.5,3.4-20.3,2.3-5.8,5.3-10.6,9.1-14.5,3.8-3.9,8.2-6.8,13.1-8.7,4.9-2,9.9-2.9,15.1-2.9,12.1,0,21.5,3.7,28.3,11.2,6.8,7.5,10.1,18.7,10.1,33.5s0,2.4,0,3.8c0,1.4-.1,2.7-.3,3.8h-57.9c.6,7,3,12.5,7.5,16.3,4.4,3.9,10.8,5.8,19.2,5.8s9.4-.4,13.5-1.3c4.1-.9,7.3-1.8,9.6-2.8l2.7,16.6c-1.1.6-2.7,1.1-4.6,1.8-2,.6-4.2,1.2-6.7,1.7-2.5.5-5.2.9-8.1,1.3-2.9.3-5.9.5-8.9.5-7.7,0-14.4-1.1-20.1-3.4-5.7-2.3-10.4-5.5-14.1-9.6-3.7-4.1-6.4-8.9-8.2-14.4-1.8-5.5-2.7-11.6-2.7-18.2ZM431.6,134.9c0-2.8-.4-5.5-1.2-8-.8-2.5-1.9-4.7-3.4-6.5-1.5-1.8-3.4-3.3-5.5-4.4-2.2-1.1-4.8-1.6-7.8-1.6s-5.9.6-8.2,1.8c-2.3,1.2-4.3,2.7-6,4.6-1.6,1.9-2.9,4.1-3.8,6.5-.9,2.5-1.5,5-1.8,7.5h37.7Z"/><path d="M460.1,144c0-7.7,1.1-14.5,3.4-20.3,2.3-5.8,5.3-10.6,9.1-14.5,3.8-3.9,8.2-6.8,13.1-8.7,4.9-2,9.9-2.9,15.1-2.9,12.1,0,21.5,3.7,28.3,11.2,6.8,7.5,10.1,18.7,10.1,33.5s0,2.4,0,3.8c0,1.4-.1,2.7-.3,3.8h-57.9c.6,7,3,12.5,7.5,16.3,4.4,3.9,10.8,5.8,19.2,5.8s9.4-.4,13.5-1.3c4.1-.9,7.3-1.8,9.6-2.8l2.7,16.6c-1.1.6-2.7,1.1-4.6,1.8-2,.6-4.2,1.2-6.7,1.7-2.5.5-5.2.9-8.1,1.3-2.9.3-5.9.5-8.9.5-7.7,0-14.4-1.1-20.1-3.4-5.7-2.3-10.4-5.5-14.1-9.6-3.7-4.1-6.4-8.9-8.2-14.4-1.8-5.5-2.7-11.6-2.7-18.2ZM519,134.9c0-2.8-.4-5.5-1.2-8-.8-2.5-1.9-4.7-3.4-6.5-1.5-1.8-3.4-3.3-5.5-4.4-2.2-1.1-4.8-1.6-7.8-1.6s-5.9.6-8.2,1.8-4.3,2.7-6,4.6c-1.6,1.9-2.9,4.1-3.8,6.5-.9,2.5-1.5,5-1.8,7.5h37.7Z"/><path d="M552.4,187.4V60.6l20.3-3.4v43.4c2.2-.8,4.8-1.5,7.8-2,3-.6,5.9-.8,8.8-.8,7,0,12.9,1,17.5,2.9,4.6,2,8.4,4.7,11.2,8.2,2.8,3.5,4.8,7.7,6,12.7,1.2,4.9,1.8,10.4,1.8,16.4v49.3h-20.3v-46.1c0-4.7-.3-8.7-.9-12-.6-3.3-1.6-6-3-8.1-1.4-2.1-3.3-3.6-5.6-4.5s-5.3-1.4-8.7-1.4-5.4.3-8.2.8c-2.8.6-4.9,1.1-6.2,1.5v69.8h-20.3Z"/><path d="M636.7,144c0-7.7,1.1-14.5,3.4-20.3,2.3-5.8,5.3-10.6,9.1-14.5,3.8-3.9,8.2-6.8,13.1-8.7,4.9-2,9.9-2.9,15.1-2.9,12.1,0,21.5,3.7,28.3,11.2,6.8,7.5,10.1,18.7,10.1,33.5s0,2.4,0,3.8c0,1.4-.1,2.7-.3,3.8h-57.9c.6,7,3,12.5,7.5,16.3,4.4,3.9,10.8,5.8,19.2,5.8s9.4-.4,13.5-1.3c4.1-.9,7.3-1.8,9.6-2.8l2.7,16.6c-1.1.6-2.7,1.1-4.6,1.8-2,.6-4.2,1.2-6.7,1.7-2.5.5-5.2.9-8.1,1.3-2.9.3-5.9.5-8.9.5-7.7,0-14.4-1.1-20.1-3.4-5.7-2.3-10.4-5.5-14.1-9.6-3.7-4.1-6.4-8.9-8.2-14.4-1.8-5.5-2.7-11.6-2.7-18.2ZM695.6,134.9c0-2.8-.4-5.5-1.2-8-.8-2.5-1.9-4.7-3.4-6.5-1.5-1.8-3.4-3.3-5.5-4.4-2.2-1.1-4.8-1.6-7.8-1.6s-5.9.6-8.2,1.8-4.3,2.7-6,4.6c-1.6,1.9-2.9,4.1-3.8,6.5-.9,2.5-1.5,5-1.8,7.5h37.7Z"/><path d="M760.4,126.6l18.6-26.9h21.3l-29.5,42c6.2,7.7,12.1,15.5,17.7,23.4,5.6,7.9,10.3,15.3,13.9,22.3h-22.1c-1-2.1-2.3-4.3-3.9-6.8-1.6-2.5-3.3-5-5.2-7.7-1.8-2.7-3.8-5.3-5.7-7.9-2-2.6-3.9-5.1-5.8-7.4-3.9,4.6-7.8,9.6-11.5,15.1-3.8,5.5-6.9,10.4-9.3,14.7h-20.7c1.7-3.4,3.7-6.9,6.1-10.6,2.4-3.7,5-7.5,7.8-11.4,2.8-3.9,5.6-7.8,8.5-11.7,2.9-3.9,5.8-7.6,8.7-11.1l-29.8-42.9h22.3l18.6,26.9Z"/><path d="M838.5,97.5c6.7,0,12.3.8,16.9,2.5,4.6,1.7,8.2,4,11,7,2.7,3,4.7,6.7,5.9,11,1.2,4.3,1.8,9,1.8,14.2v53.2c-3.1.7-7.9,1.5-14.2,2.4-6.3.9-13.4,1.4-21.4,1.4s-10.1-.5-14.4-1.5c-4.4-1-8.1-2.6-11.2-4.9-3.1-2.2-5.5-5.1-7.2-8.7-1.7-3.6-2.6-8-2.6-13.2s1-9.3,2.9-12.7c2-3.5,4.6-6.3,8-8.5,3.4-2.2,7.2-3.7,11.7-4.7,4.4-.9,9-1.4,13.8-1.4s4.6.1,7,.4c2.5.3,5.1.8,7.9,1.4v-3.4c0-2.3-.3-4.6-.8-6.7-.6-2.1-1.5-4-2.9-5.6-1.4-1.6-3.2-2.9-5.5-3.8-2.3-.9-5.2-1.3-8.6-1.3s-9,.3-12.9,1c-3.9.7-7.1,1.5-9.6,2.3l-2.5-16.4c2.6-.9,6.3-1.8,11.2-2.7,4.9-.9,10.2-1.3,15.8-1.3ZM840.1,173.2c6.3,0,11-.3,14.3-1v-22.5c-1.1-.3-2.7-.7-4.9-1-2.1-.3-4.5-.5-7-.5s-4.5.2-6.8.5c-2.3.3-4.4.9-6.2,1.8s-3.3,2.2-4.4,3.8c-1.1,1.6-1.7,3.7-1.7,6.1,0,4.8,1.5,8.1,4.5,10s7.1,2.8,12.2,2.8Z"/><path d="M106.4,0L0,61.7v123.4l106.4,61.7,106.4-61.7V61.7L106.4,0ZM106.3,22.6l81.5,47.3-81.5,47.3L24.9,69.9,106.3,22.6ZM192.5,172.4l-86.1,50.1-86.1-49.6v-29.5l86.1,49.6,86.1-50.1v29.5ZM192.5,119.7l-86.1,50.1L20.3,119.7v-29.5l86.2,50.1,86.1-50.1v29.5Z"/></svg>
+      <span class="brand-rule" aria-hidden="true"></span>
       <div>
         <h1>Hexa<span>Sync</span> · Daily Formatter</h1>
-        <p>Dán note thô của cả team → nhận lại một block markdown đúng chuẩn.</p>
+        <p>Paste the team&rsquo;s raw notes &rarr; get one standard markdown block.</p>
       </div>
     </div>
 
@@ -280,7 +287,7 @@
         <input type="text" id="project" value="HexaSync" spellcheck="false" />
       </div>
       <div class="field">
-        <label for="date">Ngày</label>
+        <label for="date">Date</label>
         <input type="date" id="date" />
       </div>
       <div class="field">
@@ -293,7 +300,7 @@
   <div class="grid">
 
     <!-- ======= RAIL ======= -->
-    <section class="panel" id="panelRail" aria-label="Trạng thái team">
+    <section class="panel" id="panelRail" aria-label="Team status">
       <div class="panel-head">
         <h2>Team roster</h2>
         <span class="count" id="rosterCount">0/0</span>
@@ -302,69 +309,70 @@
       <ul class="rail" id="rail"></ul>
 
       <div class="rail-foot">
-        <div class="stat"><span>Đã update</span><b id="statSynced">0</b></div>
+        <div class="stat"><span>Reported</span><b id="statSynced">0</b></div>
         <div class="stat"><span>OFF</span><b id="statOff">0</b></div>
-        <div class="stat"><span>Task hôm nay</span><b id="statTasks">0</b></div>
+        <div class="stat"><span>Tasks today</span><b id="statTasks">0</b></div>
       </div>
 
       <details class="opts">
-        <summary>Sửa danh sách team</summary>
+        <summary>Edit roster</summary>
         <div class="opts-body">
-          <textarea id="roster" spellcheck="false" aria-label="Danh sách thành viên, mỗi dòng một tên"></textarea>
-          <p class="hint">Mỗi dòng một tên. Thứ tự ở đây là thứ tự trong output.</p>
+          <textarea id="roster" spellcheck="false" aria-label="Roster, one name per line"></textarea>
+          <p class="hint">One name per line. This order is the output order.</p>
         </div>
       </details>
 
       <details class="opts">
-        <summary>Tuỳ chọn</summary>
+        <summary>Options</summary>
         <div class="opts-body">
-          <label class="check"><input type="checkbox" id="optLegend" checked><span>Kèm phần chú thích ký hiệu (✅ ❌ ❓ ⚠️ 🗓️)</span></label>
-          <label class="check"><input type="checkbox" id="optNA" checked><span>Tự điền <code>- N/A</code> khi mục Obstacles trống</span></label>
-          <label class="check"><input type="checkbox" id="optSkipOffObs"><span>Bỏ mục Obstacles với người OFF</span></label>
-          <label class="check"><input type="checkbox" id="optExtra" checked><span>Thêm người lạ (có trong note, không có trong roster) vào cuối</span></label>
-          <label class="check"><input type="checkbox" id="optIndent" checked><span>Chuẩn hoá thụt lề về 2 space mỗi cấp</span></label>
-          <label class="check"><input type="checkbox" id="optBullet" checked><span>Tự thêm dấu <code>-</code> cho dòng chưa có bullet</span></label>
-          <label class="check"><input type="checkbox" id="optCheckbox" checked><span>Tự thêm <code>[ ]</code> cho task trong “Note của tôi”</span></label>
+          <label class="check"><input type="checkbox" id="optLegend" checked><span>Include the legend block (✅ ❌ ❓ ⚠️ 🗓️)</span></label>
+          <label class="check"><input type="checkbox" id="optNA" checked><span>Fill <code>- N/A</code> when Obstacles is empty</span></label>
+          <label class="check"><input type="checkbox" id="optSkipOffObs"><span>Skip Obstacles for people who are OFF</span></label>
+          <label class="check"><input type="checkbox" id="optExtra" checked><span>Append people found in the notes but missing from the roster</span></label>
+          <label class="check"><input type="checkbox" id="optIndent" checked><span>Normalize indentation to 2 spaces per level</span></label>
+          <label class="check"><input type="checkbox" id="optBullet" checked><span>Add <code>-</code> to lines with no bullet</span></label>
+          <label class="check"><input type="checkbox" id="optCheckbox" checked><span>Add <code>[ ]</code> to tasks in &ldquo;My note&rdquo;</span></label>
         </div>
       </details>
     </section>
 
-    <!-- ======= MY NOTE + INPUT ======= -->
+    <!-- ======= MY NOTE + TEAM NOTES ======= -->
     <div class="col-mid">
 
-    <section class="panel" id="panelMine" aria-label="Note của tôi">
+    <section class="panel" id="panelMine" aria-label="My note">
       <div class="panel-head">
-        <h2>Note của tôi</h2>
-        <input type="text" id="myName" list="rosterNames" spellcheck="false" placeholder="Tên của bạn" aria-label="Tên của bạn" />
+        <h2>My note</h2>
+        <input type="text" id="myName" list="rosterNames" spellcheck="false" placeholder="Your name" aria-label="Your name" />
         <datalist id="rosterNames"></datalist>
       </div>
       <div class="mine-body">
         <span class="lbl">Today</span>
-        <textarea id="myToday" spellcheck="false" placeholder="- [Profile API] Migrate approval flow&#10;  - Fix bug scheduler&#10;- [SSO] Review PR"></textarea>
+        <textarea id="myToday" spellcheck="false" placeholder="- [Profile API] Migrate approval flow&#10;  - Fix scheduler bug&#10;- [SSO] Review PR&#10;&#10;Tab / Shift+Tab to indent."></textarea>
         <span class="lbl">Obstacles</span>
-        <textarea id="myObstacles" spellcheck="false" placeholder="Bỏ trống = N/A"></textarea>
+        <textarea id="myObstacles" spellcheck="false" placeholder="Leave empty = N/A"></textarea>
       </div>
     </section>
 
-    <section class="panel" id="panelInput" aria-label="Note thô">
+    <section class="panel" id="panelInput" aria-label="Team notes">
       <div class="panel-head">
-        <h2>Note team</h2>
+        <h2>Team notes</h2>
         <div class="btn-row">
-          <button class="btn" id="btnSample" type="button">Ví dụ</button>
-          <button class="btn" id="btnClear" type="button">Xoá</button>
+          <button class="btn" id="btnSample" type="button">Sample</button>
+          <button class="btn" id="btnClear" type="button">Clear</button>
+          <button class="btn accent" id="btnConvert" type="button">Convert</button>
         </div>
       </div>
-      <textarea id="input" spellcheck="false" placeholder="Dán note của từng người vào đây, ví dụ:&#10;&#10;### [KHANH VO]&#10;#### [TODAY]&#10;- [SSO]&#10;  - [ ] Fix bug Workspace&#10;#### [OBSTACLES]&#10;- N/A&#10;&#10;Ai không có tên trong note sẽ tự động thành OFF."></textarea>
+      <textarea id="input" spellcheck="false" placeholder="Paste each teammate&#39;s note here, for example:&#10;&#10;### [KHANH VO]&#10;#### [TODAY]&#10;- [SSO]&#10;  - [ ] Fix Workspace bug&#10;#### [OBSTACLES]&#10;- N/A&#10;&#10;Anyone without a name line is marked OFF."></textarea>
     </section>
 
     </div>
 
     <!-- ======= OUTPUT ======= -->
-    <section class="panel" id="panelOutput" aria-label="Output chuẩn">
+    <section class="panel" id="panelOutput" aria-label="Standard output">
       <div class="panel-head">
-        <h2>Output chuẩn</h2>
+        <h2>Standard output</h2>
         <div class="btn-row">
-          <button class="btn" id="btnDownload" type="button">Tải .md</button>
+          <button class="btn" id="btnDownload" type="button">Download .md</button>
           <button class="btn primary" id="btnCopy" type="button">Copy</button>
         </div>
       </div>
@@ -377,13 +385,13 @@
   </div>
 
   <footer>
-    <span>Chạy hoàn toàn trong trình duyệt — note của bạn không đi đâu cả.</span>
-    <span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> để copy output</span>
+    <span>Runs entirely in your browser &mdash; your notes never leave this page.</span>
+    <span><kbd>Tab</kbd> to indent &middot; <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to copy</span>
   </footer>
 </div>
 
 <script>
-/* CORE:START — logic thuần, không đụng DOM */
+/* CORE:START - pure logic, no DOM access */
 
 var DEFAULT_ROSTER = [
   "GIA LE","KHANH VO","THANH DAT","QUYNH","LONG",
@@ -411,7 +419,7 @@ function formatDate(iso){
   return MONTHS[m - 1] + " " + String(d).padStart(2, "0") + ", " + y;
 }
 
-/* Bỏ dấu tiếng Việt + ký tự lạ để so tên cho chắc */
+/* Strip accents and punctuation so names always match */
 function normKey(s){
   return String(s || "")
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -425,7 +433,7 @@ function parseRoster(text){
     .filter(Boolean);
 }
 
-/* Gỡ #, bullet, **, [], ":" để lấy phần chữ trần của một dòng tiêu đề */
+/* Strip #, bullets, **, [] and ":" to get the bare text of a heading line */
 function bareTitle(line){
   var t = String(line).trim();
   t = t.replace(/^#{1,6}\s*/, "");
@@ -440,7 +448,7 @@ function bareTitle(line){
 function classifySection(line){
   var t = String(line).trim();
   if (!t) return null;
-  if (/\[[ xX]\]/.test(t)) return null;              // dòng task, không phải tiêu đề
+  if (/\[[ xX]\]/.test(t)) return null;              // a task line, not a heading
   var isHeading = /^#{1,6}\s+/.test(t);
   var bare = bareTitle(t);
   if (!bare || bare.length > (isHeading ? 40 : 24)) return null;
@@ -453,7 +461,7 @@ function classifySection(line){
   return null;
 }
 
-/* "Obstacle: chờ infra team" -> vừa là tiêu đề mục, vừa có nội dung ngay sau dấu hai chấm */
+/* "Obstacle: waiting on infra" -> heading and content on the same line */
 function splitInlineSection(line){
   var m = String(line).match(/^\s*(?:#{1,6}\s*)?[-*+]?\s*([^:：]{2,26})[:：]\s+(\S.*)$/);
   if (!m) return null;
@@ -479,7 +487,7 @@ function detectMember(line, rosterMap, allowUnknown){
   return null;
 }
 
-/* Chuẩn hoá thân bài: bỏ dòng trống, đưa thụt lề về 2 space/cấp, thống nhất bullet */
+/* Normalize a section body: drop blank lines, 2 spaces per level, one bullet style */
 function normalizeBody(lines, opts){
   opts = opts || {};
   var stack = [], out = [], levels = [], inFence = false;
@@ -497,16 +505,16 @@ function normalizeBody(lines, opts){
     var level = stack.length - 1;
 
     var text = body.replace(/^[*+]\s+/, "- ");
-    if (/^\[[ xX]\]/.test(text)) text = "- " + text;
+    if (/^\[\s*[xX]?\s*\]/.test(text)) text = "- " + text;
     if (opts.autoBullet && !/^([-#>|]|\d+[.)]\s)/.test(text)) text = "- " + text;
-    text = text.replace(/^-\s*\[( |x|X)\]/, function(_, c){ return "- [" + (c === " " ? " " : "x") + "]"; });
+    text = text.replace(/^-\s*\[\s*([xX]?)\s*\]\s*/, function(_, c){ return "- [" + (c ? "x" : " ") + "] "; });
 
     var pad = opts.normalizeIndent ? new Array(level + 1).join("  ") : (raw.match(/^ */) || [""])[0];
     out.push(pad + text);
     levels.push(level);
   }
 
-  /* dòng lá (không có dòng con) và chưa có checkbox -> thêm "[ ]" */
+  /* leaf lines (no children) without a checkbox -> add "[ ]" */
   if (opts.autoCheckbox){
     for (var j = 0; j < out.length; j++){
       if (levels[j] < 0) continue;
@@ -571,7 +579,7 @@ function parseNotes(raw, roster, opts){
       else sec[target].push(line);
     });
 
-    if (byName[b.name]){                       // gộp nếu một người xuất hiện 2 lần
+    if (byName[b.name]){                       // merge when the same person appears twice
       var prev = byName[b.name];
       prev.today = prev.today.concat(sec.today);
       prev.obstacles = prev.obstacles.concat(sec.obstacles);
@@ -600,7 +608,7 @@ function buildReport(raw, cfg){
   var rosterMap = {};
   roster.forEach(function(n){ rosterMap[normKey(n)] = n; });
 
-  /* Note riêng của người dùng — luôn được ghép vào, kể cả khi tên không có trong roster */
+  /* The user's own note - always merged in, even if the name is not in the roster */
   var mine = cfg.mine || null, myName = null;
   if (mine && String(mine.name || "").trim()){
     myName = rosterMap[normKey(mine.name)] || String(mine.name).trim().toUpperCase();
@@ -700,7 +708,7 @@ function buildReport(raw, cfg){
     rail: $("rail"), rosterCount: $("rosterCount"),
     statSynced: $("statSynced"), statOff: $("statOff"), statTasks: $("statTasks"),
     warn: $("warn"), copy: $("btnCopy"), download: $("btnDownload"),
-    sample: $("btnSample"), clear: $("btnClear"),
+    sample: $("btnSample"), clear: $("btnClear"), convert: $("btnConvert"),
     legend: $("optLegend"), na: $("optNA"), skipOff: $("optSkipOffObs"),
     extra: $("optExtra"), indent: $("optIndent"), bullet: $("optBullet"), checkbox: $("optCheckbox")
   };
@@ -763,7 +771,7 @@ function buildReport(raw, cfg){
     els.output.innerHTML = highlight(res.text);
 
     els.rail.innerHTML = res.statuses.map(function(s){
-      var label = s.isMe ? "bạn" : (s.state === "off" ? "off" : (s.state === "extra" ? "thêm" : "sync"));
+      var label = s.isMe ? "you" : (s.state === "off" ? "off" : (s.state === "extra" ? "new" : "sync"));
       return '<li class="' + s.state + '"><span class="tile"></span>' +
              '<span class="name">' + esc(s.name) + "</span>" +
              '<span class="meta">' + label + "</span></li>";
@@ -777,25 +785,82 @@ function buildReport(raw, cfg){
     var myFilled = (els.myToday.value + els.myObstacles.value).trim() !== "";
     if (myFilled && !els.myName.value.trim()){
       els.warn.className = "warn";
-      els.warn.textContent = "Note của bạn chưa được ghép vào output — điền tên của bạn ở ô góc phải panel \u201CNote của tôi\u201D.";
+      els.warn.textContent = "Your note is not in the output yet \u2014 enter your name in the field at the top of \u201CMy note\u201D.";
     } else if (!els.input.value.trim() && !myFilled){
       els.warn.className = "warn";
-      els.warn.textContent = "Chưa có note nào — cả team đang được ghi OFF. Dán note vào ô bên trái để bắt đầu.";
+      els.warn.textContent = "No notes yet \u2014 everyone is marked OFF. Paste the team notes to start.";
     } else if (res.syncedCount === 0){
       els.warn.className = "warn";
-      els.warn.textContent = "Không khớp được tên nào. Mỗi người cần một dòng tên riêng, ví dụ: ### [KHANH VO]";
+      els.warn.textContent = "No names matched. Each person needs their own name line, e.g. ### [KHANH VO]";
     } else if (res.extras.length){
       els.warn.className = "warn";
-      els.warn.textContent = "Không có trong roster: " + res.extras.join(", ") +
-        (els.extra.checked ? " — đã thêm vào cuối output." : " — đang bị bỏ qua.");
+      els.warn.textContent = "Not in the roster: " + res.extras.join(", ") +
+        (els.extra.checked ? " \u2014 appended to the end of the output." : " \u2014 currently skipped.");
     } else {
       els.warn.className = "warn hidden";
     }
   }
 
+  /* Tab / Shift+Tab indents instead of moving focus; Escape releases the field */
+  function handleTab(e){
+    var ta = e.target;
+    if (e.key === "Escape"){ ta.blur(); return; }
+
+    /* Enter keeps the current indentation and bullet */
+    if (e.key === "Enter" && !e.shiftKey && !e.metaKey && !e.ctrlKey){
+      var v = ta.value, at = ta.selectionStart;
+      if (at !== ta.selectionEnd) return;
+      var ls = v.lastIndexOf("\n", at - 1) + 1;
+      var m = v.slice(ls, at).match(/^([ \t]*)(-[ \t]+(?:\[[ xX]\][ \t]+)?)?(.*)$/);
+      if (!m) return;
+      var indent = m[1], marker = m[2] || "", rest = m[3];
+      if (marker && !rest.trim()){                 // empty bullet -> clear the line
+        e.preventDefault();
+        ta.value = v.slice(0, ls) + v.slice(at);
+        ta.selectionStart = ta.selectionEnd = ls;
+        render();
+        return;
+      }
+      if (!indent && !marker) return;
+      e.preventDefault();
+      var ins = "\n" + indent + (marker ? "- " : "");
+      ta.value = v.slice(0, at) + ins + v.slice(at);
+      ta.selectionStart = ta.selectionEnd = at + ins.length;
+      render();
+      return;
+    }
+
+    if (e.key !== "Tab") return;
+    e.preventDefault();
+
+    var val = ta.value, start = ta.selectionStart, end = ta.selectionEnd;
+    var lineStart = val.lastIndexOf("\n", start - 1) + 1;
+    var blockEnd = val.indexOf("\n", end);
+    if (blockEnd === -1) blockEnd = val.length;
+
+    var first = 0, total = 0;
+    var block = val.slice(lineStart, blockEnd).split("\n").map(function(l, i){
+      if (e.shiftKey){
+        var cut = ((l.match(/^ {1,2}/) || [""])[0]).length;
+        if (i === 0) first = cut;
+        total += cut;
+        return l.slice(cut);
+      }
+      if (i === 0) first = 2;
+      total += 2;
+      return "  " + l;
+    }).join("\n");
+
+    var sign = e.shiftKey ? -1 : 1;
+    ta.value = val.slice(0, lineStart) + block + val.slice(blockEnd);
+    ta.selectionStart = Math.max(lineStart, start + sign * first);
+    ta.selectionEnd = Math.max(lineStart, end + sign * total);
+    render();
+  }
+
   function copyOutput(){
     var done = function(ok){
-      els.copy.textContent = ok ? "Đã copy ✓" : "Copy lỗi";
+      els.copy.textContent = ok ? "Copied \u2713" : "Copy failed";
       els.copy.className = ok ? "btn ok" : "btn";
       setTimeout(function(){ els.copy.textContent = "Copy"; els.copy.className = "btn primary"; }, 1600);
     };
@@ -855,7 +920,7 @@ function buildReport(raw, cfg){
     "- [Customers]",
     "  - [ ] Collect Sapo customer information.",
     "#### [OBSTACLES]",
-    "- Chờ khách xác nhận mapping kho.",
+    "- Waiting for the customer to confirm the warehouse mapping.",
     "",
     "### [QUYNH]",
     "OFF"
@@ -866,6 +931,20 @@ function buildReport(raw, cfg){
   });
   ["date", "legend", "na", "skipOff", "extra", "indent", "bullet", "checkbox"].forEach(function(k){
     els[k].addEventListener("change", render);
+  });
+
+  [els.myToday, els.myObstacles, els.input].forEach(function(ta){
+    ta.addEventListener("keydown", handleTab);
+  });
+
+  els.convert.addEventListener("click", function(){
+    render();
+    var panel = document.getElementById("panelOutput");
+    panel.classList.add("flash");
+    setTimeout(function(){ panel.classList.remove("flash"); }, 700);
+    if (window.matchMedia("(max-width:1180px)").matches){
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   });
 
   els.copy.addEventListener("click", copyOutput);
