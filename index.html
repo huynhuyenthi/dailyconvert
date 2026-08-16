@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HexaSync · Daily Formatter</title>
+<meta name="description" content="Dán daily note của cả team, nhận lại một block markdown đúng chuẩn HexaSync Delivery Daily." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,4 92,27 92,73 50,96 8,73 8,27' fill='%234CE0C0'/></svg>">
+<style>
+  :root{
+    --ink:#0C111D;
+    --ink-2:#111827;
+    --panel:#141C2E;
+    --panel-2:#182136;
+    --line:#26344E;
+    --line-soft:#1D293F;
+    --text:#DCE5F5;
+    --text-dim:#9BAAC6;
+    --muted:#6C7E9C;
+    --sync:#4CE0C0;
+    --pulse:#F2A65A;
+    --edge:#7C93FF;
+    --danger:#FF7B72;
+    --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans:"IBM Plex Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --r:10px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(900px 500px at 88% -10%, rgba(124,147,255,.16), transparent 60%),
+      radial-gradient(700px 420px at 4% 8%, rgba(76,224,192,.10), transparent 62%),
+      var(--ink);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(rgba(124,147,255,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,147,255,.045) 1px, transparent 1px);
+    background-size:52px 52px;
+    mask-image:radial-gradient(1200px 700px at 50% 0%, #000 20%, transparent 85%);
+  }
+
+  .wrap{position:relative; z-index:1; max-width:1560px; margin:0 auto; padding:22px 22px 60px}
+
+  /* ---------- header ---------- */
+  .top{
+    display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;
+    padding-bottom:18px; margin-bottom:18px; border-bottom:1px solid var(--line-soft);
+  }
+  .brand{display:flex; align-items:center; gap:13px; min-width:0}
+  .mark{width:38px; height:38px; flex:none; display:block}
+  .brand h1{
+    margin:0; font-family:var(--mono); font-size:17px; font-weight:600;
+    letter-spacing:.14em; text-transform:uppercase; white-space:nowrap;
+  }
+  .brand h1 span{color:var(--sync)}
+  .brand p{margin:1px 0 0; font-size:12.5px; color:var(--muted); letter-spacing:.02em}
+
+  .top-fields{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end}
+  .field{display:flex; flex-direction:column; gap:5px}
+  .field label{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  input[type="text"], input[type="date"], textarea{
+    background:var(--ink-2); color:var(--text);
+    border:1px solid var(--line); border-radius:8px;
+    padding:9px 11px; font-family:var(--mono); font-size:13px;
+    outline:none; transition:border-color .15s, box-shadow .15s;
+  }
+  input[type="text"]:focus, input[type="date"]:focus, textarea:focus{
+    border-color:var(--edge); box-shadow:0 0 0 3px rgba(124,147,255,.16);
+  }
+  input[type="date"]{color-scheme:dark}
+  #project{width:150px}
+
+  /* ---------- layout ---------- */
+  .grid{display:grid; grid-template-columns:288px minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start}
+  .col-mid{display:flex; flex-direction:column; gap:18px; min-width:0}
+  @media (min-width:1181px){
+    .col-mid, #panelOutput{height:clamp(480px, calc(100vh - 196px), 960px)}
+    #panelInput{flex:1; min-height:0}
+    #panelInput #input{flex:1; min-height:0}
+    #panelOutput .out-wrap{flex:1; min-height:0; max-height:none}
+  }
+  @media (max-width:1180px){
+    .grid{display:flex; flex-direction:column}
+    .col-mid{order:1} #panelOutput{order:2} #panelRail{order:3}
+  }
+  @media (max-width:640px){
+    .wrap{padding:16px 14px 40px}
+    .brand h1{white-space:normal; font-size:15px}
+    .top-fields{width:100%}
+    .field{flex:1 1 140px}
+    .field input{width:100% !important}
+  }
+
+  /* ---------- note của tôi ---------- */
+  .mine-body{padding:12px 14px 14px; display:flex; flex-direction:column; gap:9px}
+  .mine-body .lbl{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .mine-body textarea{width:100%; resize:vertical; line-height:1.7; font-size:13px; tab-size:2}
+  #myToday{min-height:112px}
+  #myObstacles{min-height:52px}
+  #myName{width:168px; text-transform:uppercase; letter-spacing:.06em}
+  #panelMine .panel-head{gap:12px}
+
+  .panel{
+    background:linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    border:1px solid var(--line-soft); border-radius:var(--r);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .panel-head{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px 14px; border-bottom:1px solid var(--line-soft); background:rgba(0,0,0,.16);
+  }
+  .panel-head h2{
+    margin:0; font-family:var(--mono); font-size:11px; font-weight:600;
+    letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim);
+    display:flex; align-items:center; gap:9px;
+  }
+  .panel-head h2::before{
+    content:""; width:9px; height:10px; background:var(--edge); flex:none;
+    clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  }
+  .panel-head .count{font-family:var(--mono); font-size:11px; color:var(--muted)}
+  .panel-body{padding:14px}
+
+  /* ---------- roster rail (signature) ---------- */
+  .rail{list-style:none; margin:0; padding:6px 0}
+  .rail li{
+    display:flex; align-items:center; gap:11px;
+    padding:7px 14px; border-left:2px solid transparent;
+    font-family:var(--mono); font-size:12.5px; letter-spacing:.03em;
+    transition:background .15s, border-color .15s;
+  }
+  .rail li:hover{background:rgba(124,147,255,.06)}
+  .tile{
+    width:13px; height:15px; flex:none;
+    clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+    background:var(--line);
+  }
+  .rail .name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-dim)}
+  .rail .meta{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+  .rail li.synced{border-left-color:var(--sync)}
+  .rail li.synced .tile{background:var(--sync); box-shadow:0 0 12px rgba(76,224,192,.45)}
+  .rail li.synced .name{color:var(--text)}
+  .rail li.synced .meta{color:var(--sync)}
+  .rail li.off .tile{background:transparent; box-shadow:inset 0 0 0 2px var(--pulse)}
+  .rail li.off .meta{color:var(--pulse)}
+  .rail li.extra{border-left-color:var(--edge)}
+  .rail li.extra .tile{background:var(--edge)}
+  .rail li.extra .meta{color:var(--edge)}
+
+  .rail-foot{padding:12px 14px; border-top:1px solid var(--line-soft)}
+  .stat{display:flex; justify-content:space-between; font-family:var(--mono); font-size:11.5px; color:var(--muted); padding:2px 0}
+  .stat b{color:var(--text-dim); font-weight:500}
+
+  /* ---------- options ---------- */
+  details.opts{border-top:1px solid var(--line-soft)}
+  details.opts > summary{
+    list-style:none; cursor:pointer; padding:11px 14px;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--muted); display:flex; align-items:center; justify-content:space-between;
+  }
+  details.opts > summary::-webkit-details-marker{display:none}
+  details.opts > summary:hover{color:var(--text-dim)}
+  details.opts > summary::after{content:"+"; font-size:14px; line-height:1}
+  details.opts[open] > summary::after{content:"−"}
+  .opts-body{padding:2px 14px 14px}
+  .opts-body textarea{width:100%; min-height:150px; resize:vertical; line-height:1.7}
+  .hint{font-size:11.5px; color:var(--muted); margin:8px 0 0; line-height:1.5}
+  .check{display:flex; gap:10px; align-items:flex-start; padding:7px 0; cursor:pointer; font-size:13px; color:var(--text-dim)}
+  .check input{
+    appearance:none; width:16px; height:16px; flex:none; margin-top:2px;
+    border:1px solid var(--line); border-radius:4px; background:var(--ink-2); cursor:pointer;
+    transition:background .15s, border-color .15s;
+  }
+  .check input:checked{background:var(--sync); border-color:var(--sync)}
+  .check input:checked::after{content:"✓"; display:block; color:#06251E; font-size:12px; font-weight:700; text-align:center; line-height:14px}
+  .check input:focus-visible{outline:2px solid var(--edge); outline-offset:2px}
+
+  /* ---------- editor / output ---------- */
+  #input{
+    width:100%; min-height:340px; resize:vertical; border:0; border-radius:0;
+    background:transparent; padding:14px; line-height:1.7; font-size:13px; tab-size:2;
+  }
+  #input:focus{box-shadow:none}
+  #input::placeholder{color:#4B5C7A}
+
+  .out-wrap{position:relative; max-height:640px; overflow:auto}
+  pre#output{
+    margin:0; padding:14px; font-family:var(--mono); font-size:12.5px; line-height:1.75;
+    white-space:pre-wrap; word-break:break-word; color:var(--text-dim);
+  }
+  #output .h1{color:#fff; font-weight:600}
+  #output .h2{color:var(--edge); font-weight:600}
+  #output .h3{color:var(--sync); font-weight:600}
+  #output .h4{color:var(--text); font-weight:500}
+  #output .box{color:var(--edge)}
+  #output .done{color:var(--sync)}
+  #output .tag{color:var(--pulse)}
+  #output .code{color:#8FE0FF; background:rgba(143,224,255,.09); padding:0 4px; border-radius:4px}
+  #output .b{color:var(--text); font-weight:600}
+  #output .i{color:var(--muted); font-style:italic}
+  #output .na{color:var(--muted)}
+  #output .offv{color:var(--pulse)}
+
+  .empty{padding:34px 18px; text-align:center; color:var(--muted); font-size:13px}
+  .empty strong{display:block; color:var(--text-dim); font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px}
+  .empty code{font-family:var(--mono); color:var(--sync); font-size:12px}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    background:var(--ink-2); color:var(--text-dim); border:1px solid var(--line);
+    padding:8px 13px; border-radius:7px; cursor:pointer;
+    transition:color .15s, border-color .15s, background .15s, transform .1s;
+  }
+  .btn:hover{color:var(--text); border-color:var(--edge)}
+  .btn:active{transform:translateY(1px)}
+  .btn:focus-visible{outline:2px solid var(--edge); outline-offset:2px}
+  .btn.primary{background:var(--sync); border-color:var(--sync); color:#06251E; font-weight:600}
+  .btn.primary:hover{background:#69EACE; color:#06251E}
+  .btn.ok{background:var(--sync); border-color:var(--sync); color:#06251E}
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap}
+
+  .warn{
+    margin:0; padding:10px 14px; border-top:1px solid var(--line-soft);
+    background:rgba(242,166,90,.08); color:var(--pulse);
+    font-family:var(--mono); font-size:11.5px; line-height:1.6;
+  }
+  .warn.hidden{display:none}
+
+  footer{
+    margin-top:26px; padding-top:14px; border-top:1px solid var(--line-soft);
+    font-family:var(--mono); font-size:11px; color:var(--muted);
+    display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:space-between;
+  }
+  kbd{
+    font-family:var(--mono); font-size:10.5px; background:var(--ink-2);
+    border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 5px; color:var(--text-dim);
+  }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
+        <polygon points="50,3 91,26 91,74 50,97 9,74 9,26" fill="none" stroke="#4CE0C0" stroke-width="4"/>
+        <polygon points="50,26 71,38 71,62 50,74 29,62 29,38" fill="#7C93FF" opacity=".85"/>
+      </svg>
+      <div>
+        <h1>Hexa<span>Sync</span> · Daily Formatter</h1>
+        <p>Dán note thô của cả team → nhận lại một block markdown đúng chuẩn.</p>
+      </div>
+    </div>
+
+    <div class="top-fields">
+      <div class="field">
+        <label for="project">Project</label>
+        <input type="text" id="project" value="HexaSync" spellcheck="false" />
+      </div>
+      <div class="field">
+        <label for="date">Ngày</label>
+        <input type="date" id="date" />
+      </div>
+      <div class="field">
+        <label for="section">Section title</label>
+        <input type="text" id="section" value="HEXASYNC DELIVERY DAILY" spellcheck="false" style="width:220px" />
+      </div>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- ======= RAIL ======= -->
+    <section class="panel" id="panelRail" aria-label="Trạng thái team">
+      <div class="panel-head">
+        <h2>Team roster</h2>
+        <span class="count" id="rosterCount">0/0</span>
+      </div>
+
+      <ul class="rail" id="rail"></ul>
+
+      <div class="rail-foot">
+        <div class="stat"><span>Đã update</span><b id="statSynced">0</b></div>
+        <div class="stat"><span>OFF</span><b id="statOff">0</b></div>
+        <div class="stat"><span>Task hôm nay</span><b id="statTasks">0</b></div>
+      </div>
+
+      <details class="opts">
+        <summary>Sửa danh sách team</summary>
+        <div class="opts-body">
+          <textarea id="roster" spellcheck="false" aria-label="Danh sách thành viên, mỗi dòng một tên"></textarea>
+          <p class="hint">Mỗi dòng một tên. Thứ tự ở đây là thứ tự trong output.</p>
+        </div>
+      </details>
+
+      <details class="opts">
+        <summary>Tuỳ chọn</summary>
+        <div class="opts-body">
+          <label class="check"><input type="checkbox" id="optLegend" checked><span>Kèm phần chú thích ký hiệu (✅ ❌ ❓ ⚠️ 🗓️)</span></label>
+          <label class="check"><input type="checkbox" id="optNA" checked><span>Tự điền <code>- N/A</code> khi mục Obstacles trống</span></label>
+          <label class="check"><input type="checkbox" id="optSkipOffObs"><span>Bỏ mục Obstacles với người OFF</span></label>
+          <label class="check"><input type="checkbox" id="optExtra" checked><span>Thêm người lạ (có trong note, không có trong roster) vào cuối</span></label>
+          <label class="check"><input type="checkbox" id="optIndent" checked><span>Chuẩn hoá thụt lề về 2 space mỗi cấp</span></label>
+          <label class="check"><input type="checkbox" id="optBullet" checked><span>Tự thêm dấu <code>-</code> cho dòng chưa có bullet</span></label>
+          <label class="check"><input type="checkbox" id="optCheckbox" checked><span>Tự thêm <code>[ ]</code> cho task trong “Note của tôi”</span></label>
+        </div>
+      </details>
+    </section>
+
+    <!-- ======= MY NOTE + INPUT ======= -->
+    <div class="col-mid">
+
+    <section class="panel" id="panelMine" aria-label="Note của tôi">
+      <div class="panel-head">
+        <h2>Note của tôi</h2>
+        <input type="text" id="myName" list="rosterNames" spellcheck="false" placeholder="Tên của bạn" aria-label="Tên của bạn" />
+        <datalist id="rosterNames"></datalist>
+      </div>
+      <div class="mine-body">
+        <span class="lbl">Today</span>
+        <textarea id="myToday" spellcheck="false" placeholder="- [Profile API] Migrate approval flow&#10;  - Fix bug scheduler&#10;- [SSO] Review PR"></textarea>
+        <span class="lbl">Obstacles</span>
+        <textarea id="myObstacles" spellcheck="false" placeholder="Bỏ trống = N/A"></textarea>
+      </div>
+    </section>
+
+    <section class="panel" id="panelInput" aria-label="Note thô">
+      <div class="panel-head">
+        <h2>Note team</h2>
+        <div class="btn-row">
+          <button class="btn" id="btnSample" type="button">Ví dụ</button>
+          <button class="btn" id="btnClear" type="button">Xoá</button>
+        </div>
+      </div>
+      <textarea id="input" spellcheck="false" placeholder="Dán note của từng người vào đây, ví dụ:&#10;&#10;### [KHANH VO]&#10;#### [TODAY]&#10;- [SSO]&#10;  - [ ] Fix bug Workspace&#10;#### [OBSTACLES]&#10;- N/A&#10;&#10;Ai không có tên trong note sẽ tự động thành OFF."></textarea>
+    </section>
+
+    </div>
+
+    <!-- ======= OUTPUT ======= -->
+    <section class="panel" id="panelOutput" aria-label="Output chuẩn">
+      <div class="panel-head">
+        <h2>Output chuẩn</h2>
+        <div class="btn-row">
+          <button class="btn" id="btnDownload" type="button">Tải .md</button>
+          <button class="btn primary" id="btnCopy" type="button">Copy</button>
+        </div>
+      </div>
+      <div class="out-wrap">
+        <pre id="output"></pre>
+      </div>
+      <p class="warn hidden" id="warn"></p>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>Chạy hoàn toàn trong trình duyệt — note của bạn không đi đâu cả.</span>
+    <span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> để copy output</span>
+  </footer>
+</div>
+
+<script>
+/* CORE:START — logic thuần, không đụng DOM */
+
+var DEFAULT_ROSTER = [
+  "GIA LE","KHANH VO","THANH DAT","QUYNH","LONG",
+  "THAI","NHI","TUAN MINH","KIEU ANH","TRI NGUYEN"
+];
+
+var LEGEND = [
+  "- ✅ Good",
+  "- ❌ Bad, don't do this, not good",
+  "- ❓ Concerns / needs follow-up",
+  "- ⚠️ Obstacles / blocking / important alerts",
+  "- 🗓️ Waiting for review, Review"
+];
+
+var MONTHS = ["January","February","March","April","May","June",
+              "July","August","September","October","November","December"];
+
+var OFF_WORDS = /^(OFF|OFFLINE|DAYOFF|NGHI|NGHIPHEP|LEAVE|ONLEAVE|PTO|ANNUALLEAVE|VACATION|SICKLEAVE|ABSENT)$/;
+
+function formatDate(iso){
+  var p = String(iso || "").split("-");
+  if (p.length !== 3) return iso || "";
+  var y = p[0], m = parseInt(p[1], 10), d = p[2];
+  if (!MONTHS[m - 1]) return iso;
+  return MONTHS[m - 1] + " " + String(d).padStart(2, "0") + ", " + y;
+}
+
+/* Bỏ dấu tiếng Việt + ký tự lạ để so tên cho chắc */
+function normKey(s){
+  return String(s || "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d").replace(/Đ/g, "D")
+    .toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function parseRoster(text){
+  return String(text || "").split(/\n+/)
+    .map(function(s){ return s.replace(/^[-*+\d.\s]+/, "").trim(); })
+    .filter(Boolean);
+}
+
+/* Gỡ #, bullet, **, [], ":" để lấy phần chữ trần của một dòng tiêu đề */
+function bareTitle(line){
+  var t = String(line).trim();
+  t = t.replace(/^#{1,6}\s*/, "");
+  t = t.replace(/^[-*+]\s+/, "");
+  t = t.replace(/\*\*/g, "").replace(/__/g, "").replace(/^\*+|\*+$/g, "");
+  t = t.replace(/[:：]\s*$/, "").trim();
+  var m = t.match(/^\[([^\[\]]+)\]$/);
+  if (m) t = m[1].trim();
+  return t;
+}
+
+function classifySection(line){
+  var t = String(line).trim();
+  if (!t) return null;
+  if (/\[[ xX]\]/.test(t)) return null;              // dòng task, không phải tiêu đề
+  var isHeading = /^#{1,6}\s+/.test(t);
+  var bare = bareTitle(t);
+  if (!bare || bare.length > (isHeading ? 40 : 24)) return null;
+  var k = normKey(bare);
+  if (!k) return null;
+  if (/^(TODAY|TODO|HOMNAY|WORKTODAY|TODAYTASK|TODAYS|PLANTODAY)$/.test(k)) return { type:"today", title:bare };
+  if (k.indexOf("OBSTACLE") >= 0 || k.indexOf("BLOCKER") >= 0 ||
+      k.indexOf("IMPEDIMENT") >= 0 || k.indexOf("VUONGMAC") >= 0) return { type:"obstacles", title:bare };
+  if (isHeading && /^#{4,6}\s+/.test(t)) return { type:"other", title:bare };
+  return null;
+}
+
+/* "Obstacle: chờ infra team" -> vừa là tiêu đề mục, vừa có nội dung ngay sau dấu hai chấm */
+function splitInlineSection(line){
+  var m = String(line).match(/^\s*(?:#{1,6}\s*)?[-*+]?\s*([^:：]{2,26})[:：]\s+(\S.*)$/);
+  if (!m) return null;
+  if (/\[[ xX]\]/.test(m[1])) return null;
+  var sec = classifySection(m[1].trim());
+  if (!sec) return null;
+  return { section: sec, rest: m[2].trim() };
+}
+
+function detectMember(line, rosterMap, allowUnknown){
+  var t = String(line).trim();
+  if (!t) return null;
+  if (/\[[ xX]\]/.test(t)) return null;
+  var bare = bareTitle(t);
+  if (!bare || bare.length > 40) return null;
+  if (classifySection(t)) return null;
+  var k = normKey(bare);
+  if (!k) return null;
+  if (rosterMap[k]) return { name: rosterMap[k], known: true };
+  if (allowUnknown && /^#{3,6}\s+/.test(t) && /^\[.+\]$/.test(t.replace(/^#{1,6}\s*/, "").trim())) {
+    return { name: bare.toUpperCase(), known: false };
+  }
+  return null;
+}
+
+/* Chuẩn hoá thân bài: bỏ dòng trống, đưa thụt lề về 2 space/cấp, thống nhất bullet */
+function normalizeBody(lines, opts){
+  opts = opts || {};
+  var stack = [], out = [], levels = [], inFence = false;
+  for (var i = 0; i < lines.length; i++){
+    var raw = String(lines[i]).replace(/\t/g, "  ").replace(/\s+$/, "");
+    var body = raw.trim();
+    if (/^(```|~~~)/.test(body)) { inFence = !inFence; out.push(raw); levels.push(-1); continue; }
+    if (inFence) { out.push(raw); levels.push(-1); continue; }
+    if (!body) continue;
+
+    var indent = (raw.match(/^ */) || [""])[0].length;
+    while (stack.length && indent < stack[stack.length - 1]) stack.pop();
+    if (!stack.length) stack.push(indent);
+    else if (indent > stack[stack.length - 1]) stack.push(indent);
+    var level = stack.length - 1;
+
+    var text = body.replace(/^[*+]\s+/, "- ");
+    if (/^\[[ xX]\]/.test(text)) text = "- " + text;
+    if (opts.autoBullet && !/^([-#>|]|\d+[.)]\s)/.test(text)) text = "- " + text;
+    text = text.replace(/^-\s*\[( |x|X)\]/, function(_, c){ return "- [" + (c === " " ? " " : "x") + "]"; });
+
+    var pad = opts.normalizeIndent ? new Array(level + 1).join("  ") : (raw.match(/^ */) || [""])[0];
+    out.push(pad + text);
+    levels.push(level);
+  }
+
+  /* dòng lá (không có dòng con) và chưa có checkbox -> thêm "[ ]" */
+  if (opts.autoCheckbox){
+    for (var j = 0; j < out.length; j++){
+      if (levels[j] < 0) continue;
+      var next = (j + 1 < levels.length) ? levels[j + 1] : -1;
+      if (next > levels[j]) continue;
+      var t = out[j].replace(/^\s*/, "");
+      if (!/^- /.test(t)) continue;
+      var rest = t.slice(2).trim();
+      if (!rest || /^\[[ xX]\]/.test(rest) || /^\[[^\]]+\]$/.test(rest)) continue;
+      if (/^(OFF|N\/A)$/i.test(rest)) continue;
+      out[j] = out[j].replace(/^(\s*- )/, "$1[ ] ");
+    }
+  }
+  return out;
+}
+
+function isOffBody(lines){
+  var real = lines.filter(function(l){ return l.trim(); });
+  if (!real.length) return true;
+  if (real.length > 1) return false;
+  var t = real[0].trim().replace(/^[-*+]\s*/, "").replace(/^\[[ xX]\]\s*/, "");
+  return OFF_WORDS.test(normKey(t));
+}
+
+function parseNotes(raw, roster, opts){
+  opts = opts || {};
+  var rosterMap = {};
+  roster.forEach(function(n){ rosterMap[normKey(n)] = n; });
+
+  var lines = String(raw || "").replace(/\r\n?/g, "\n").split("\n");
+  var blocks = [], current = null, inFence = false;
+
+  for (var i = 0; i < lines.length; i++){
+    var line = lines[i];
+    if (/^\s*(```|~~~)/.test(line)) inFence = !inFence;
+    var hit = inFence ? null : detectMember(line, rosterMap, opts.allowUnknown !== false);
+    if (hit){
+      current = { name: hit.name, known: hit.known, lines: [] };
+      blocks.push(current);
+      continue;
+    }
+    if (current) current.lines.push(line);
+  }
+
+  var byName = {};
+  blocks.forEach(function(b){
+    var sec = { today: [], obstacles: [], extras: [], hasObstacleHeader: false };
+    var target = "today", extra = null, fence = false;
+
+    b.lines.forEach(function(line){
+      if (/^\s*(```|~~~)/.test(line)) fence = !fence;
+      var inline = fence ? null : splitInlineSection(line);
+      var s = fence ? null : (inline ? inline.section : classifySection(line));
+      if (s){
+        if (s.type === "today"){ target = "today"; extra = null; }
+        else if (s.type === "obstacles"){ target = "obstacles"; extra = null; sec.hasObstacleHeader = true; }
+        else { extra = { title: s.title, lines: [] }; sec.extras.push(extra); target = "extra"; }
+        if (!inline) return;
+        line = inline.rest;
+      }
+      if (target === "extra" && extra) extra.lines.push(line);
+      else sec[target].push(line);
+    });
+
+    if (byName[b.name]){                       // gộp nếu một người xuất hiện 2 lần
+      var prev = byName[b.name];
+      prev.today = prev.today.concat(sec.today);
+      prev.obstacles = prev.obstacles.concat(sec.obstacles);
+      prev.extras = prev.extras.concat(sec.extras);
+      prev.hasObstacleHeader = prev.hasObstacleHeader || sec.hasObstacleHeader;
+    } else {
+      sec.known = b.known;
+      byName[b.name] = sec;
+    }
+  });
+
+  return byName;
+}
+
+function buildReport(raw, cfg){
+  cfg = cfg || {};
+  var roster = cfg.roster && cfg.roster.length ? cfg.roster : DEFAULT_ROSTER;
+  var opts = {
+    autoBullet: cfg.autoBullet !== false,
+    normalizeIndent: cfg.normalizeIndent !== false,
+    allowUnknown: cfg.allowUnknown !== false
+  };
+
+  var parsed = parseNotes(raw, roster, opts);
+
+  var rosterMap = {};
+  roster.forEach(function(n){ rosterMap[normKey(n)] = n; });
+
+  /* Note riêng của người dùng — luôn được ghép vào, kể cả khi tên không có trong roster */
+  var mine = cfg.mine || null, myName = null;
+  if (mine && String(mine.name || "").trim()){
+    myName = rosterMap[normKey(mine.name)] || String(mine.name).trim().toUpperCase();
+    var mineOpts = { autoBullet: true, normalizeIndent: true, autoCheckbox: cfg.autoCheckbox !== false };
+    var myToday = normalizeBody(String(mine.today || "").split("\n"), mineOpts);
+    var myObs = normalizeBody(String(mine.obstacles || "").split("\n"), { autoBullet: true, normalizeIndent: true });
+    var slot = parsed[myName] || { today: [], obstacles: [], extras: [], known: true };
+    if (myToday.length){
+      if (isOffBody(normalizeBody(slot.today, opts))) slot.today = [];
+      slot.today = slot.today.concat(myToday);
+    }
+    if (myObs.length){
+      if (isOffBody(normalizeBody(slot.obstacles, opts))) slot.obstacles = [];
+      slot.obstacles = slot.obstacles.concat(myObs);
+    }
+    if (myToday.length || myObs.length || parsed[myName]){
+      slot.known = true;
+      slot.isMe = true;
+      parsed[myName] = slot;
+    }
+  }
+
+  var order = roster.slice();
+  var extraPeople = [];
+
+  Object.keys(parsed).forEach(function(n){
+    if (order.indexOf(n) === -1){
+      if (n !== myName) extraPeople.push(n);
+      if (opts.allowUnknown || n === myName) order.push(n);
+    }
+  });
+
+  var statuses = [], tasks = 0, blocks = [];
+
+  order.forEach(function(name){
+    var data = parsed[name];
+    var todayLines = data ? normalizeBody(data.today, opts) : [];
+    var off = !data || isOffBody(todayLines);
+
+    if (off) todayLines = ["- OFF"];
+    var cb = todayLines.filter(function(l){ return /\[[ xX]\]/.test(l); }).length;
+    if (cb) tasks += cb;
+    else if (!off) tasks += todayLines.filter(function(l){ return /^\s*-\s+\S/.test(l); }).length;
+
+    var obsLines = data ? normalizeBody(data.obstacles, opts) : [];
+    if (!obsLines.length && cfg.autoNA !== false) obsLines = ["- N/A"];
+
+    var chunk = "### [" + name + "]\n\n#### [TODAY]\n" + todayLines.join("\n");
+
+    if (data && data.extras.length){
+      data.extras.forEach(function(ex){
+        var body = normalizeBody(ex.lines, opts);
+        if (!body.length) body = ["- N/A"];
+        chunk += "\n\n#### [" + ex.title.replace(/^\[|\]$/g, "") + "]\n" + body.join("\n");
+      });
+    }
+
+    var showObs = !(off && cfg.skipObstaclesWhenOff);
+    if (showObs && obsLines.length) chunk += "\n\n#### [OBSTACLES]\n" + obsLines.join("\n");
+
+    blocks.push(chunk);
+    statuses.push({
+      name: name,
+      state: off ? "off" : (data && data.known === false ? "extra" : "synced"),
+      isMe: !!(data && data.isMe),
+      known: !(data && data.known === false)
+    });
+  });
+
+  var head = "# [" + (cfg.project || "HexaSync") + " - " + formatDate(cfg.date) + "]";
+  if (cfg.legend !== false) head += "\n" + LEGEND.join("\n");
+  head += "\n\n## " + (cfg.section || "HEXASYNC DELIVERY DAILY");
+
+  var text = head + "\n" + blocks.join("\n\n") + "\n";
+
+  return {
+    text: text,
+    statuses: statuses,
+    tasks: tasks,
+    extras: extraPeople,
+    syncedCount: statuses.filter(function(s){ return s.state !== "off"; }).length,
+    offCount: statuses.filter(function(s){ return s.state === "off"; }).length
+  };
+}
+/* CORE:END */
+
+/* ---------- DOM ---------- */
+(function(){
+  if (typeof document === "undefined") return;
+
+  var $ = function(id){ return document.getElementById(id); };
+  var els = {
+    project: $("project"), date: $("date"), section: $("section"),
+    myName: $("myName"), myToday: $("myToday"), myObstacles: $("myObstacles"),
+    rosterNames: $("rosterNames"),
+    roster: $("roster"), input: $("input"), output: $("output"),
+    rail: $("rail"), rosterCount: $("rosterCount"),
+    statSynced: $("statSynced"), statOff: $("statOff"), statTasks: $("statTasks"),
+    warn: $("warn"), copy: $("btnCopy"), download: $("btnDownload"),
+    sample: $("btnSample"), clear: $("btnClear"),
+    legend: $("optLegend"), na: $("optNA"), skipOff: $("optSkipOffObs"),
+    extra: $("optExtra"), indent: $("optIndent"), bullet: $("optBullet"), checkbox: $("optCheckbox")
+  };
+
+  var today = new Date();
+  els.date.value = today.getFullYear() + "-" +
+    String(today.getMonth() + 1).padStart(2, "0") + "-" +
+    String(today.getDate()).padStart(2, "0");
+  els.roster.value = DEFAULT_ROSTER.join("\n");
+
+  var lastText = "";
+
+  function esc(s){ return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  function highlight(md){
+    return md.split("\n").map(function(line){
+      var h = esc(line);
+      var codes = [];
+      h = h.replace(/`([^`]+)`/g, function(_, c){
+        codes.push('<span class="code">' + c + "</span>");
+        return "\u0000" + (codes.length - 1) + "\u0000";
+      });
+      h = h.replace(/\*\*([^*]+)\*\*/g, '<span class="b">$1</span>');
+      h = h.replace(/\*\(([^)]*)\)\*/g, '<span class="i">($1)</span>');
+      h = h.replace(/\[ \]/g, '<span class="box">[ ]</span>');
+      h = h.replace(/\[[xX]\]/g, '<span class="done">[x]</span>');
+      h = h.replace(/^(\s*- )\[([^\]]+)\]/, '$1<span class="tag">[$2]</span>');
+      h = h.replace(/^(- )(N\/A)$/, '$1<span class="na">$2</span>');
+      h = h.replace(/^(- )(OFF)$/, '$1<span class="offv">$2</span>');
+      if (/^#### /.test(line)) h = '<span class="h4">' + h + "</span>";
+      else if (/^### /.test(line)) h = '<span class="h3">' + h + "</span>";
+      else if (/^## /.test(line)) h = '<span class="h2">' + h + "</span>";
+      else if (/^# /.test(line)) h = '<span class="h1">' + h + "</span>";
+      return h.replace(/\u0000(\d+)\u0000/g, function(_, i){ return codes[+i]; });
+    }).join("\n");
+  }
+
+  function render(){
+    var roster = parseRoster(els.roster.value);
+    var res = buildReport(els.input.value, {
+      roster: roster,
+      mine: { name: els.myName.value, today: els.myToday.value, obstacles: els.myObstacles.value },
+      project: els.project.value.trim() || "HexaSync",
+      section: els.section.value.trim() || "HEXASYNC DELIVERY DAILY",
+      date: els.date.value,
+      legend: els.legend.checked,
+      autoNA: els.na.checked,
+      skipObstaclesWhenOff: els.skipOff.checked,
+      allowUnknown: els.extra.checked,
+      normalizeIndent: els.indent.checked,
+      autoBullet: els.bullet.checked,
+      autoCheckbox: els.checkbox.checked
+    });
+
+    els.rosterNames.innerHTML = roster.map(function(n){
+      return '<option value="' + esc(n) + '"></option>';
+    }).join("");
+
+    lastText = res.text;
+    els.output.innerHTML = highlight(res.text);
+
+    els.rail.innerHTML = res.statuses.map(function(s){
+      var label = s.isMe ? "bạn" : (s.state === "off" ? "off" : (s.state === "extra" ? "thêm" : "sync"));
+      return '<li class="' + s.state + '"><span class="tile"></span>' +
+             '<span class="name">' + esc(s.name) + "</span>" +
+             '<span class="meta">' + label + "</span></li>";
+    }).join("");
+
+    els.rosterCount.textContent = res.syncedCount + "/" + res.statuses.length;
+    els.statSynced.textContent = res.syncedCount;
+    els.statOff.textContent = res.offCount;
+    els.statTasks.textContent = res.tasks;
+
+    var myFilled = (els.myToday.value + els.myObstacles.value).trim() !== "";
+    if (myFilled && !els.myName.value.trim()){
+      els.warn.className = "warn";
+      els.warn.textContent = "Note của bạn chưa được ghép vào output — điền tên của bạn ở ô góc phải panel \u201CNote của tôi\u201D.";
+    } else if (!els.input.value.trim() && !myFilled){
+      els.warn.className = "warn";
+      els.warn.textContent = "Chưa có note nào — cả team đang được ghi OFF. Dán note vào ô bên trái để bắt đầu.";
+    } else if (res.syncedCount === 0){
+      els.warn.className = "warn";
+      els.warn.textContent = "Không khớp được tên nào. Mỗi người cần một dòng tên riêng, ví dụ: ### [KHANH VO]";
+    } else if (res.extras.length){
+      els.warn.className = "warn";
+      els.warn.textContent = "Không có trong roster: " + res.extras.join(", ") +
+        (els.extra.checked ? " — đã thêm vào cuối output." : " — đang bị bỏ qua.");
+    } else {
+      els.warn.className = "warn hidden";
+    }
+  }
+
+  function copyOutput(){
+    var done = function(ok){
+      els.copy.textContent = ok ? "Đã copy ✓" : "Copy lỗi";
+      els.copy.className = ok ? "btn ok" : "btn";
+      setTimeout(function(){ els.copy.textContent = "Copy"; els.copy.className = "btn primary"; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(lastText).then(function(){ done(true); }, function(){ done(fallbackCopy()); });
+    } else {
+      done(fallbackCopy());
+    }
+  }
+
+  function fallbackCopy(){
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = lastText;
+      ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch(e){ return false; }
+  }
+
+  function download(){
+    var blob = new Blob([lastText], { type: "text/markdown;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (els.project.value.trim() || "daily") + "-" + els.date.value + ".md";
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  var SAMPLE = [
+    "### [KHANH VO]",
+    "#### [TODAY]",
+    "",
+    "- [Infrastructure]",
+    "    - [ ] Research **Istio Service Mesh** to enable mTLS across the infrastructure.",
+    "",
+    "- [SSO]",
+    "    - [ ] IAM feature - Split into multiple implementable phases.",
+    "        - [ ] Test and fix bugs in the Workspace and Team Management features.",
+    "",
+    "#### [OBSTACLES]",
+    "- N/A",
+    "",
+    "### [THAI]",
+    "- [NLA] Backorders *(t107509)*",
+    "  - [ ] Fix the bug in the `EXCEL_READER` step.",
+    "- [Hapas] Missing Warehouse Mapping for New CSKU *(t107763)*",
+    "  - [ ] Verify the latest SKU synchronization from Anchanto to Sapo.",
+    "",
+    "### [NHI]",
+    "#### [TODAY]",
+    "- [SaoMai]",
+    "  - [ ] [CR] Add Tax Rate and Unit Price After Tax for Web and E-commerce orders.",
+    "- [Customers]",
+    "  - [ ] Collect Sapo customer information.",
+    "#### [OBSTACLES]",
+    "- Chờ khách xác nhận mapping kho.",
+    "",
+    "### [QUYNH]",
+    "OFF"
+  ].join("\n");
+
+  ["input", "project", "section", "roster", "myName", "myToday", "myObstacles"].forEach(function(k){
+    els[k].addEventListener("input", render);
+  });
+  ["date", "legend", "na", "skipOff", "extra", "indent", "bullet", "checkbox"].forEach(function(k){
+    els[k].addEventListener("change", render);
+  });
+
+  els.copy.addEventListener("click", copyOutput);
+  els.download.addEventListener("click", download);
+  els.clear.addEventListener("click", function(){ els.input.value = ""; render(); els.input.focus(); });
+  els.sample.addEventListener("click", function(){ els.input.value = SAMPLE; render(); });
+
+  document.addEventListener("keydown", function(e){
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter"){ e.preventDefault(); copyOutput(); }
+  });
+
+  render();
+})();
+
+if (typeof module !== "undefined" && module.exports){
+  module.exports = { buildReport: buildReport, parseNotes: parseNotes, normalizeBody: normalizeBody, formatDate: formatDate };
+}
+</script>
+</body>
+</html>
